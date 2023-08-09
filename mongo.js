@@ -19,6 +19,8 @@ const personSchema = mongoose.Schema({
   id: Number
 })
 
+mongoose.connect(url)
+
 personSchema.set("toJSON", {
   transform: (document, returnedObject) => {
     returnedObject.id = returnedObject._id.toString()
@@ -29,67 +31,31 @@ personSchema.set("toJSON", {
 
 const Person = mongoose.model("Person", personSchema)
 
-const connect = () => {
-  mongoose.set("strictQuery", false)
-  return mongoose.connect(url).then(() => {
-    console.log("connected")
-  })
-}
-
 const add_person = (person) => {
-  return connect().then(() => {
-    const new_person = Person(person)
-    return new_person.save().then(result => {
-      mongoose.connection.close()
-      return result
-    })
-  })
+  const new_person = Person(person)
+  return new_person.save()
 }
 
 const get_people = () => {
-  return connect().then(() => {
-    return Person.find({}).then(result => {
-      mongoose.connection.close()
-      return result
-    })
-  })
+  return Person.find({})
 }
 
 const delete_person = (id) => {
-  return connect().then(() => {
-    return Person.findByIdAndRemove(id).then(() => {
-      mongoose.connection.close()
-    })
-  })
+  return Person.findByIdAndRemove(id)
 }
 
 const get_people_count = () => {
-  return connect().then(() => {
-    return Person.countDocuments({}).then(result => {
-      mongoose.connection.close()
-      return result
-    })
-  })
+  return Person.countDocuments({})
 }
 
 const get_person = (id) => {
-  return connect().then(() => {
-    return Person.findById(id).then(result => {
-      mongoose.connection.close()
-      return result
-    })
-  })
+  return Person.findById(id)
 }
 
 const update_number = (id, body) => {
   const new_person = { name: body.name, number: body.number }
 
-  return connect().then(() => {
-    return Person.findByIdAndUpdate(id, new_person, { new: true }).then(result => {
-      mongoose.connection.close()
-      return result
-    })
-  })
+  return Person.findByIdAndUpdate(id, new_person, { new: true })
 }
 
 module.exports = { get_people, add_person, delete_person, get_people_count, get_person, update_number }
