@@ -10,7 +10,7 @@ app.use(express.static("build"))
 
 app.use(express.json())
 
-morgan.token("request-body", (req, res) => JSON.stringify(req.body))
+morgan.token("request-body", (req) => JSON.stringify(req.body))
 app.use(morgan(":method :url :status :res[content-length] - :response-time ms :request-body"))
 
 app.use(cors())
@@ -36,7 +36,7 @@ app.get("/info", (request, response, next) => {
 
 app.get("/api/people/:id", (request, response, next) => {
   const id = request.params.id
-  
+
   mongo.get_person(id).then(result => {
     if (result) {
       response.json(result)
@@ -56,23 +56,11 @@ app.delete("/api/people/:id", (request, response, next) => {
 
 app.post("/api/people", (request, response, next) => {
   mongo.get_people().then(result => {
-    let person = {name: request.body.name, number: request.body.number}
-
-    /*if (typeof content.name !== "string" || content.name === "") {
-      return response.status(400).send("{ error: 'Invalid name' }")
-    } else {
-      person.name = content.name
-    }*/
+    let person = { name: request.body.name, number: request.body.number }
 
     if (result.find(p => p.name === person.name)) {
-      return response.status(400).send("{ error: 'Name already exists' }")
+      return response.status(400).send("Name already exists")
     }
-
-    /*if (typeof content.number !== "string" || content.number === "") {
-      return response.status(400).send("{ error: 'Invalid number' ")
-    } else {
-      person.number = content.number
-    }*/
 
     mongo.add_person(person)
       .then(new_person => {response.send(new_person)})
@@ -91,7 +79,7 @@ app.put("/api/people/:id", (request, response, next) => {
 
 const errorHandler = (error, request, response, next) => {
   if (error.name === "CastError") {
-    return response.status(400).send("{ error: 'Invalid id'}")
+    return response.status(400).send("Invalid id")
   } else if (error.name === "ValidationError") {
     return response.status(400).send(error.message)
   }
